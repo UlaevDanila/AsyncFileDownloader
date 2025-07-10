@@ -1,21 +1,20 @@
 ﻿using System;
 
-namespace FileDownloader;
+namespace AsyncFileDownloader;
 
-public class FileDownloader(string url)
+public class FileDownloader()
 {
     private string _destinationPath = "D:\\Programming\\C#\\Trainee\\AsyncFileDownloader\\AsyncFileDownloader\\Result";
-    private string _url = url;
 
-    private HttpClient _httpClient = new HttpClient;
+    private readonly HttpClient _httpClient = new();
 
-    public async Task DownloadFile(CancelationToken cancelationToken, IProgress<int> progress)
+    public async Task DownloadFile(string url, CancellationToken cancellationToken, IProgress<int> progress)
     {
         try
         {
-            var content = _httpClient.GetByteArrayAsync(_url, cancelationToken);
+            var content = await _httpClient.GetByteArrayAsync(url, cancellationToken);
             await File.WriteAllBytesAsync(_destinationPath, content);
-            progress?.report(100);
+            progress?.Report(100);
         }
         catch (TaskCanceledException e)
         {
