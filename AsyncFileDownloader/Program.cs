@@ -4,16 +4,18 @@ namespace AsyncFileDownloader;
 
 public class Programm
 {
-    public static void Main()
+    public static async Task Main()
     {
-        var maxThreadCount = 3;
-        
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = cancellationTokenSource.Token;
         
-        using var resources = new SemaphoreSlim(maxThreadCount, maxThreadCount);
+        var resources = new SemaphoreSlim(1, 3);
         
         var fileDownloader = new FileDownloader();
+
+        var destinationPath = "D:\\Programming\\C#\\Trainee\\AsyncFileDownloader\\AsyncFileDownloader\\Result";
+
+        var progress = new Progress<int>(percent => Console.WriteLine($"Прогресс: {percent}%"));
         
         IEnumerable<string> urls = new List<string>()
         {
@@ -28,7 +30,7 @@ public class Programm
             await resources.WaitAsync(cancellationToken);
             try
             {
-                await fileDownloader.DownloadFile(url, cancellationToken, new Progress<int>());
+                await fileDownloader.DownloadFile(url, cancellationToken, progress, destinationPath);
             }
             finally
             {

@@ -1,19 +1,35 @@
-﻿using System;
-
-namespace AsyncFileDownloader;
+﻿namespace AsyncFileDownloader;
 
 public class FileDownloader()
 {
-    private string _destinationPath = "D:\\Programming\\C#\\Trainee\\AsyncFileDownloader\\AsyncFileDownloader\\Result";
+    private int _pictureCounter = 0;
+
+    private int PictureCounter
+    {
+        get
+        {
+            _pictureCounter += 1;
+            return _pictureCounter;
+        }
+    }
+
 
     private readonly HttpClient _httpClient = new();
 
-    public async Task DownloadFile(string url, CancellationToken cancellationToken, IProgress<int> progress)
+    public async Task DownloadFile(string url, CancellationToken cancellationToken, 
+                                    IProgress<int> progress, string destinationPath)
     {
+        if (!Directory.Exists(destinationPath))
+        {
+            Directory.CreateDirectory(destinationPath);
+        }
+
+        var pathToPicture = destinationPath + $"/picture_{PictureCounter}.png";
+
         try
         {
             var content = await _httpClient.GetByteArrayAsync(url, cancellationToken);
-            await File.WriteAllBytesAsync(_destinationPath, content);
+            await File.WriteAllBytesAsync(pathToPicture, content);
             progress?.Report(100);
         }
         catch (TaskCanceledException e)
@@ -21,10 +37,9 @@ public class FileDownloader()
             Console.WriteLine("Произошёл сбой");
             throw;
         }
-        catch (HttpRequestException e)
+        catch (InvalidOperationException e)
         {
             Console.WriteLine("Введён некорретный url");
-            throw;
         }
     }
 }
